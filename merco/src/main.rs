@@ -5,7 +5,9 @@ mod exchange;
 mod handlers;
 mod models;
 mod services;
+mod strategy;
 mod tasks;
+mod utils;
 
 use sqlx::postgres::PgPoolOptions;
 use std::{

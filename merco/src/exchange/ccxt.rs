@@ -69,7 +69,7 @@ impl CCXT {
     ) -> AppResult<Vec<Candle>> {
         fn f64_to_bigdecimal(value: f64, field_name: &str) -> AppResult<BigDecimal> {
             BigDecimal::from_f64(value)
-                .ok_or_else(|| AppError::Internal(format!("Invalid {}: {}", field_name, value)))
+                .ok_or_else(|| format!("Invalid {}: {}", field_name, value).into())
         }
 
         Python::attach(|py| {
@@ -82,10 +82,7 @@ impl CCXT {
             let mut candles = Vec::new();
             for [timestamp_ms, open, high, low, close, volume] in candles_data {
                 let Some(timestamp) = Utc.timestamp_millis_opt(timestamp_ms as i64).single() else {
-                    return Err(AppError::Internal(format!(
-                        "Error while parse timestamp: {}",
-                        timestamp_ms
-                    )));
+                    return Err(format!("Error while parse timestamp: {}", timestamp_ms).into());
                 };
 
                 candles.push(Candle {

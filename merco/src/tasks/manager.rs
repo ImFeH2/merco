@@ -100,10 +100,11 @@ impl TaskManager {
                 None => {
                     let first_batch = ccxt.fetch_candles(symbol, timeframe, Some(0), None)?;
                     let Some(latest_candle) = first_batch.last() else {
-                        return Err(AppError::Internal(format!(
+                        return Err(format!(
                             "No candles data available for {} on {}",
                             symbol, exchange
-                        )));
+                        )
+                        .into());
                     };
 
                     candles::insert_candles(&pool, &first_batch).await?;
@@ -116,10 +117,7 @@ impl TaskManager {
         let now = Utc::now();
         let duration = now.signed_duration_since(next_since);
         let Some(time_diff_ms) = duration.num_milliseconds().to_u64() else {
-            return Err(AppError::Internal(format!(
-                "Invalid time range for {} on {}",
-                symbol, exchange
-            )));
+            return Err(format!("Invalid time range for {} on {}", symbol, exchange).into());
         };
 
         let mut count: u64 = 0;

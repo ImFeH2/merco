@@ -1,0 +1,20 @@
+use merco::{AppResult, Strategy, StrategyContext, strategy};
+use serde_json::to_string;
+
+#[strategy]
+struct MyStrategy {}
+
+impl Strategy for MyStrategy {
+    fn tick(&mut self, context: StrategyContext) -> AppResult<()> {
+        let candle = context.candle()?;
+
+        println!("latest candle: {}", to_string(&candle)?);
+        Ok(())
+    }
+}
+
+impl Default for MyStrategy {
+    fn default() -> Self {
+        Self {}
+    }
+}

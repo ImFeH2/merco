@@ -40,18 +40,18 @@ pub struct CreateTaskResponse {
 
 pub async fn create_fetch_task(
     State(state): State<AppState>,
-    Json(req): Json<CreateFetchTaskRequest>,
+    Json(request): Json<CreateFetchTaskRequest>,
 ) -> ApiResult<CreateTaskResponse> {
     let context = TaskContext {
         db_pool: state.db_pool,
     };
 
     let config = TaskConfig::FetchCandles {
-        symbol: req.symbol,
-        exchange: req.exchange,
-        timeframe: req.timeframe,
-        start_date: req.start,
-        end_date: req.end,
+        symbol: request.symbol,
+        exchange: request.exchange,
+        timeframe: request.timeframe,
+        start_date: request.start,
+        end_date: request.end,
     };
 
     let task_id = state.task_manager.create_task(context, config).await;

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Navbar from '@/components/Navbar'
 import MarketData from '@/pages/MarketData'
+import Strategy from '@/pages/Strategy'
 import Backtest from '@/pages/Backtest'
 import Optimization from '@/pages/Optimization'
 import Live from '@/pages/Live'
@@ -13,6 +14,8 @@ function App() {
     switch (activeTab) {
       case 'market':
         return <MarketData />
+      case 'strategy':
+        return <Strategy />
       case 'backtest':
         return <Backtest />
       case 'optimization':
@@ -27,9 +30,9 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50">
       <Navbar activeTab={activeTab} onTabChange={setActiveTab} />
-      <main>{renderPage()}</main>
+      <main className="flex-1 overflow-hidden">{renderPage()}</main>
     </div>
   )
 }

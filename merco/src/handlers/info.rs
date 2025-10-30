@@ -17,7 +17,7 @@ pub async fn check() -> ApiResult<&'static str> {
 }
 
 pub async fn error() -> ApiResult<()> {
-    Err(AppError::Internal("Manual error trigered".to_string()))
+    Err("Manual error trigered".into())
 }
 
 pub async fn list_exchanges() -> ApiResult<Vec<String>> {

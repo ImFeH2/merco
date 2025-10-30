@@ -1,9 +1,11 @@
 export default function Backtest() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-white rounded-xl border border-gray-200 p-8">
-        <h1 className="text-2xl font-medium text-gray-900 mb-2">Backtest</h1>
-        <p className="text-gray-500">Backtest functionality coming soon...</p>
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-xl border border-gray-200 p-8">
+          <h1 className="text-2xl font-medium text-gray-900 mb-2">Backtest</h1>
+          <p className="text-gray-500">Backtest functionality coming soon...</p>
+        </div>
       </div>
     </div>
   )

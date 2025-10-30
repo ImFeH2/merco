@@ -5,6 +5,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use toml_edit::TomlError;
 use ts_rs::TS;
 
 #[derive(Debug, Serialize, Deserialize, TS)]
@@ -22,11 +23,17 @@ pub enum AppError {
     #[error("Bad Request: {0}")]
     BadRequest(String),
 
+    #[error("Io Error: {0}")]
+    IO(#[from] std::io::Error),
+
     #[error("Database Error: {0}")]
     Database(#[from] sqlx::Error),
 
     #[error("Python Error: {0}")]
     Python(#[from] pyo3::PyErr),
+
+    #[error("Strategy Error: {0}")]
+    Strategy(#[from] libloading::Error),
 
     #[error("Internal Error: {0}")]
     Internal(String),
@@ -53,6 +60,16 @@ impl IntoResponse for AppError {
                 );
                 (StatusCode::BAD_REQUEST, "BadRequest", msg.clone())
             }
+            AppError::IO(err) => {
+                let msg = err.to_string();
+                tracing::error!(
+                    error_type = %"IO",
+                    status_code = %StatusCode::INTERNAL_SERVER_ERROR,
+                    message = %msg,
+                    "IO operation failed"
+                );
+                (StatusCode::INTERNAL_SERVER_ERROR, "IO", msg)
+            }
             AppError::Database(err) => {
                 let msg = err.to_string();
                 tracing::error!(
@@ -73,6 +90,16 @@ impl IntoResponse for AppError {
                 );
                 (StatusCode::INTERNAL_SERVER_ERROR, "Python", msg)
             }
+            AppError::Strategy(err) => {
+                let msg = err.to_string();
+                tracing::error!(
+                    error_type = %"Strategy",
+                    status_code = %StatusCode::INTERNAL_SERVER_ERROR,
+                    message = %msg,
+                    "Strategy operation failed"
+                );
+                (StatusCode::INTERNAL_SERVER_ERROR, "Strategy", msg)
+            }
             AppError::Internal(msg) => {
                 tracing::error!(
                     error_type = %"Internal",
@@ -92,6 +119,12 @@ impl IntoResponse for AppError {
     }
 }
 
+impl From<&str> for AppError {
+    fn from(msg: &str) -> Self {
+        AppError::Internal(msg.to_string())
+    }
+}
+
 impl From<String> for AppError {
     fn from(msg: String) -> Self {
         AppError::Internal(msg)
@@ -107,6 +140,18 @@ impl From<pyo3::CastError<'_, '_>> for AppError {
 impl From<serde_json::Error> for AppError {
     fn from(err: serde_json::Error) -> Self {
         AppError::BadRequest(format!("JSON parse error: {}", err))
+    }
+}
+
+impl From<TomlError> for AppError {
+    fn from(err: TomlError) -> Self {
+        AppError::Internal(err.to_string())
+    }
+}
+
+impl From<cargo_metadata::Error> for AppError {
+    fn from(err: cargo_metadata::Error) -> Self {
+        AppError::Internal(err.to_string())
     }
 }
 

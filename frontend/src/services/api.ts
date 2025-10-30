@@ -5,7 +5,13 @@ import type {
   ErrorResponse,
   Task,
   TaskEvent,
-  Timeframe
+  Timeframe,
+  GetSourceResponse,
+  GetSourceQuery,
+  SaveSourceQuery,
+  DeleteSourceQuery,
+  MoveSourceQuery,
+  AddStrategyRequest
 } from '@/types'
 
 const API_BASE_URL = 'http://localhost:3001'
@@ -102,6 +108,31 @@ export const api = {
       })
       return fetchAPI<Candle[]>(`/candles?${query}`)
     },
+  },
+
+  source: {
+    get: (query: GetSourceQuery) =>
+      fetchAPI<GetSourceResponse>(`/strategy/source/get?path=${encodeURIComponent(query.path)}`),
+
+    save: (query: SaveSourceQuery, content: string) =>
+      fetchAPI<void>(`/strategy/source/save?path=${encodeURIComponent(query.path)}`, {
+        method: 'POST',
+        body: JSON.stringify(content),
+      }),
+
+    delete: (query: DeleteSourceQuery) =>
+      fetchAPI<void>(`/strategy/source/delete?path=${encodeURIComponent(query.path)}`),
+
+    move: (query: MoveSourceQuery) =>
+      fetchAPI<void>(`/strategy/source/move?old_path=${encodeURIComponent(query.old_path)}&new_path=${encodeURIComponent(query.new_path)}`),
+  },
+
+  strategy: {
+    add: (request: AddStrategyRequest) =>
+      fetchAPI<void>('/strategy/add', {
+        method: 'POST',
+        body: JSON.stringify(request),
+      }),
   },
 }
 

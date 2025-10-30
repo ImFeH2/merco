@@ -107,171 +107,173 @@ export default function MarketData() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-medium text-gray-900 mb-1">Market Data</h1>
-        <p className="text-sm text-gray-500">Download historical market data from exchanges</p>
-      </div>
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-medium text-gray-900 mb-1">Market Data</h1>
+          <p className="text-sm text-gray-500">Download historical market data from exchanges</p>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h2 className="text-sm font-medium text-gray-900 mb-4">Select Exchange</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="text-sm font-medium text-gray-900 mb-4">Select Exchange</h2>
 
-            {loading && exchanges.length === 0 ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader className="w-6 h-6 text-gray-400 animate-spin" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                {exchanges.map((exchange) => (
+              {loading && exchanges.length === 0 ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader className="w-6 h-6 text-gray-400 animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {exchanges.map((exchange) => (
+                    <button
+                      key={exchange}
+                      onClick={() => setSelectedExchange(exchange)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedExchange === exchange
+                        ? 'bg-gray-900 text-white'
+                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                        }`}
+                    >
+                      {exchange}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {selectedExchange && (
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h2 className="text-sm font-medium text-gray-900 mb-4">Select Symbol & Timeframe</h2>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-2">Symbol</label>
+                    <div className="relative mb-3">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Search symbols..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                      />
+                    </div>
+
+                    <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
+                      {loading ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader className="w-5 h-5 text-gray-400 animate-spin" />
+                        </div>
+                      ) : (
+                        filteredSymbols.map((symbol) => (
+                          <button
+                            key={symbol}
+                            onClick={() => setSelectedSymbol(symbol)}
+                            className={`w-full px-4 py-2 text-left text-sm transition-colors ${selectedSymbol === symbol
+                              ? 'bg-gray-100 text-gray-900 font-medium'
+                              : 'text-gray-700 hover:bg-gray-50'
+                              }`}
+                          >
+                            {symbol}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-2">Timeframe</label>
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                      {Object.entries(timeframes).map(([tf, label]) => (
+                        <button
+                          key={tf}
+                          onClick={() => setSelectedTimeframe(tf as Timeframe)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedTimeframe === tf
+                            ? 'bg-gray-900 text-white'
+                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                            }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <button
-                    key={exchange}
-                    onClick={() => setSelectedExchange(exchange)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedExchange === exchange
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                      }`}
+                    onClick={createFetchTask}
+                    disabled={!selectedSymbol || !selectedTimeframe || creating}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {exchange}
+                    {creating ? (
+                      <Loader className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
+                    Download Data
                   </button>
-                ))}
+                </div>
               </div>
             )}
           </div>
 
-          {selectedExchange && (
+          <div className="space-y-6">
             <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-sm font-medium text-gray-900 mb-4">Select Symbol & Timeframe</h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-2">Symbol</label>
-                  <div className="relative mb-3">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search symbols..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
-                    {loading ? (
-                      <div className="flex items-center justify-center py-8">
-                        <Loader className="w-5 h-5 text-gray-400 animate-spin" />
-                      </div>
-                    ) : (
-                      filteredSymbols.map((symbol) => (
-                        <button
-                          key={symbol}
-                          onClick={() => setSelectedSymbol(symbol)}
-                          className={`w-full px-4 py-2 text-left text-sm transition-colors ${selectedSymbol === symbol
-                            ? 'bg-gray-100 text-gray-900 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50'
-                            }`}
-                        >
-                          {symbol}
-                        </button>
-                      ))
-                    )}
-                  </div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-medium text-gray-900">Download Tasks</h2>
+                <div className={`flex items-center gap-2 text-xs ${connected ? 'text-green-600' : 'text-gray-400'
+                  }`}>
+                  <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-gray-300'
+                    }`} />
+                  {connected ? 'Connected' : 'Disconnected'}
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-2">Timeframe</label>
-                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                    {Object.entries(timeframes).map(([tf, label]) => (
-                      <button
-                        key={tf}
-                        onClick={() => setSelectedTimeframe(tf as Timeframe)}
-                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedTimeframe === tf
-                          ? 'bg-gray-900 text-white'
-                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                          }`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
+              {fetchTasks.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-gray-500">No download tasks yet</p>
                 </div>
-
-                <button
-                  onClick={createFetchTask}
-                  disabled={!selectedSymbol || !selectedTimeframe || creating}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {creating ? (
-                    <Loader className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Download className="w-4 h-4" />
-                  )}
-                  Download Data
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-medium text-gray-900">Download Tasks</h2>
-              <div className={`flex items-center gap-2 text-xs ${connected ? 'text-green-600' : 'text-gray-400'
-                }`}>
-                <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-gray-300'
-                  }`} />
-                {connected ? 'Connected' : 'Disconnected'}
-              </div>
-            </div>
-
-            {fetchTasks.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-sm text-gray-500">No download tasks yet</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {fetchTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="p-3 border border-gray-200 rounded-lg"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {task.config.symbol}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {task.config.exchange} · {task.config.timeframe}
-                        </p>
+              ) : (
+                <div className="space-y-3">
+                  {fetchTasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className="p-3 border border-gray-200 rounded-lg"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {task.config.symbol}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {task.config.exchange} · {task.config.timeframe}
+                          </p>
+                        </div>
+                        {getTaskStatusIcon(task)}
                       </div>
-                      {getTaskStatusIcon(task)}
+
+                      {task.status === 'running' && (
+                        <div className="mt-2">
+                          <div className="flex justify-between text-xs text-gray-600 mb-1">
+                            <span>Progress</span>
+                            <span>{Math.round(task.progress)}%</span>
+                          </div>
+                          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-blue-500 transition-all duration-300"
+                              style={{ width: `${task.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {task.status === 'failed' && task.error_message && (
+                        <p className="mt-2 text-xs text-red-600">{task.error_message}</p>
+                      )}
                     </div>
-
-                    {task.status === 'running' && (
-                      <div className="mt-2">
-                        <div className="flex justify-between text-xs text-gray-600 mb-1">
-                          <span>Progress</span>
-                          <span>{Math.round(task.progress)}%</span>
-                        </div>
-                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-blue-500 transition-all duration-300"
-                            style={{ width: `${task.progress}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {task.status === 'failed' && task.error_message && (
-                      <p className="mt-2 text-xs text-red-600">{task.error_message}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
