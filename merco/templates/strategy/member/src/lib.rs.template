@@ -2,14 +2,14 @@ use bigdecimal::{BigDecimal, FromPrimitive, Zero};
 use merco::{strategy, AppResult, Candle, Strategy, StrategyContext};
 
 #[strategy]
-struct MovingAverageCrossStrategy {
+struct MyStrategy {
     // Add any fields you need for your strategy here
     short_period: usize,
     long_period: usize,
     position_size_percent: BigDecimal,
 }
 
-impl Strategy for MovingAverageCrossStrategy {
+impl Strategy for MyStrategy {
     // Called on every new candle
     fn tick(&mut self, ctx: &mut StrategyContext) -> AppResult<()> {
         let candles = ctx.candles();
@@ -46,7 +46,7 @@ impl Strategy for MovingAverageCrossStrategy {
     }
 }
 
-impl MovingAverageCrossStrategy {
+impl MyStrategy {
     fn calculate_sma(&self, candles: &[Candle], period: usize) -> BigDecimal {
         self.calculate_sma_at(candles, period, 0)
     }
@@ -61,7 +61,7 @@ impl MovingAverageCrossStrategy {
     }
 }
 
-impl Default for MovingAverageCrossStrategy {
+impl Default for MyStrategy {
     fn default() -> Self {
         Self {
             short_period: 10,
