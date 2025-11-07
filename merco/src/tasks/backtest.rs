@@ -106,8 +106,8 @@ impl BacktestTask {
         db_pool: PgPool,
         mut strategy_handle: StrategyHandle,
     ) -> AppResult<BacktestResult> {
-        let exchange = &self.exchange;
-        let symbol = &self.symbol;
+        let exchange = self.exchange.clone();
+        let symbol = self.symbol.clone();
         let timeframe = self.timeframe;
 
         tracing::info!(
@@ -118,7 +118,7 @@ impl BacktestTask {
         );
 
         let all_candles =
-            services::candles::get_candles(&db_pool, exchange, symbol, timeframe, None, None)
+            services::candles::get_candles(&db_pool, &exchange, &symbol, timeframe, None, None)
                 .await?;
 
         let total_candles = all_candles.len();
@@ -127,8 +127,8 @@ impl BacktestTask {
         }
 
         let ccxt = CCXT::with_exchange(&exchange)?;
-        let fees = ccxt.fees(symbol)?;
-        let precision = ccxt.precision(symbol)?;
+        let fees = ccxt.fees(&symbol)?;
+        let precision = ccxt.precision(&symbol)?;
         let mut context = StrategyContext::new(fees, precision)?;
 
         for (index, candle) in all_candles.into_iter().enumerate() {
@@ -152,8 +152,8 @@ impl BacktestTask {
         self.broadcast();
 
         Ok(BacktestResult {
-            exchange: exchange.clone(),
-            symbol: symbol.clone(),
+            exchange,
+            symbol,
             timeframe,
             candles_processed: total_candles,
             final_balance: context.balance,

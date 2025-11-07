@@ -126,7 +126,7 @@ impl StrategyContext {
     pub(crate) fn end(&mut self) -> AppResult<()> {
         let order_ids: Vec<Uuid> = self.orders.iter().map(|o| o.id).collect();
         for id in order_ids {
-            self.remove_order(id);
+            self.cancel_order(id);
         }
 
         Ok(())
@@ -162,7 +162,7 @@ impl StrategyContext {
         &self.precision
     }
 
-    pub fn remove_order(&mut self, order_id: Uuid) {
+    pub fn cancel_order(&mut self, order_id: Uuid) {
         if let Some(pos) = self.orders.iter().position(|o| o.id == order_id) {
             let order = &self.orders[pos];
             match order.order_type {

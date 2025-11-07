@@ -90,7 +90,7 @@ impl Strategy for MyStrategy {
 - `ctx.limit_buy(price, amount)` - Place limit buy order
 - `ctx.limit_sell(price, amount)` - Place limit sell order
 - `ctx.orders()` - Get all pending orders
-- `ctx.remove_order(order_id)` - Cancel pending order
+- `ctx.cancel_order(order_id)` - Cancel pending order
 
 **Trade History:**
 

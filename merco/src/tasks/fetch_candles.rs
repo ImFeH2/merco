@@ -92,8 +92,8 @@ impl FetchCandlesTask {
     }
 
     async fn execute_fetch(&mut self, db_pool: PgPool) -> AppResult<FetchCandlesResult> {
-        let exchange = &self.exchange;
-        let symbol = &self.symbol;
+        let exchange = self.exchange.clone();
+        let symbol = self.symbol.clone();
         let timeframe = self.timeframe;
 
         tracing::info!(
@@ -103,15 +103,15 @@ impl FetchCandlesTask {
             timeframe
         );
 
-        let ccxt = CCXT::with_exchange(exchange)?;
+        let ccxt = CCXT::with_exchange(&exchange)?;
 
         let timeframe_ms = timeframe.to_ms();
         let timeframe_delta = timeframe.to_delta();
         let mut next_since =
-            match candles::get_latest_candle(&db_pool, exchange, symbol, timeframe).await? {
+            match candles::get_latest_candle(&db_pool, &exchange, &symbol, timeframe).await? {
                 Some(latest_candle) => latest_candle.timestamp + timeframe_delta,
                 None => {
-                    let first_candle = ccxt.first_candle(symbol, timeframe)?;
+                    let first_candle = ccxt.first_candle(&symbol, timeframe)?;
                     let Some(first_candle) = first_candle else {
                         return Err(format!(
                             "No candles data available for {} on {}",
@@ -145,7 +145,7 @@ impl FetchCandlesTask {
 
         loop {
             let next_since_ms = next_since.timestamp_millis();
-            let epoch = ccxt.fetch_candles(symbol, timeframe, Some(next_since_ms), None)?;
+            let epoch = ccxt.fetch_candles(&symbol, timeframe, Some(next_since_ms), None)?;
             let Some(latest) = epoch.last() else {
                 break;
             };
@@ -162,8 +162,8 @@ impl FetchCandlesTask {
         }
 
         Ok(FetchCandlesResult {
-            symbol: symbol.to_string(),
-            exchange: exchange.to_string(),
+            symbol,
+            exchange,
             timeframe,
             records: total,
         })
