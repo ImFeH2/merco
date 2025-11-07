@@ -15,7 +15,7 @@ pub async fn add_strategy(
     State(state): State<AppState>,
     Json(request): Json<AddStrategyRequest>,
 ) -> ApiResult<()> {
-    let mut strategy_manager = state.strategy_manager;
+    let strategy_manager = state.strategy_manager;
     strategy_manager.add_strategy(&request.name)?;
 
     Ok(Json(()))

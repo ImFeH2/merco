@@ -28,6 +28,7 @@ impl StrategyManager {
         let current_dir = std::env::current_dir()?;
         let workspace_dir = current_dir.join(STRATEGY_WORKDIR_NAME);
 
+        let mut initial = false;
         if !workspace_dir.is_dir() {
             if workspace_dir.exists() {
                 return Err(format!(
@@ -37,6 +38,7 @@ impl StrategyManager {
                 .into());
             }
             fs::create_dir_all(&workspace_dir)?;
+            initial = true;
         }
 
         let workspace_toml = workspace_dir.join("Cargo.toml");
@@ -44,10 +46,16 @@ impl StrategyManager {
             fs::write(workspace_toml, WORKSPACE_CARGO_TOML)?;
         }
 
-        Ok(Self { workspace_dir })
+        let manager = Self { workspace_dir };
+
+        if initial {
+            manager.add_strategy("my-strategy")?;
+        }
+
+        Ok(manager)
     }
 
-    pub fn add_strategy(&mut self, strategy_name: &str) -> AppResult<()> {
+    pub fn add_strategy(&self, strategy_name: &str) -> AppResult<()> {
         let workspace_toml_path = self.workspace_dir.join("Cargo.toml");
         let mut workspace_toml: DocumentMut = fs::read_to_string(&workspace_toml_path)?.parse()?;
 
